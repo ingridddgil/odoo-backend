@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="school_root" name="School" sequence="50" web_icon="school,static/description/icon.png"/>
+        <menuitem id="school_student" name="Student" sequence="1" parent="school_root" action="action_student"/>
+        <menuitem id="emergency_contact" name="Emergency contacts" parent="school_root" sequence="2" action="emergencyContact_act_window"/>
+    </data>
+</odoo>

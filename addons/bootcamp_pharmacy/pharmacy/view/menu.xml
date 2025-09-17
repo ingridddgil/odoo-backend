@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="pharmacy_root" name="Pharmacy" sequence="30" web_icon="pharmacy,static/description/icon.png">
+            <menuitem id="pharmacy_employee" name="Employee" sequence="1" action="action_employee"/>
+        </menuitem>
+    </data>
+</odoo>

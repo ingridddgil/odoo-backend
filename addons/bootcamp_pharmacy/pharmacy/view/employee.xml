@@ -1,0 +1,75 @@
+<odoo>
+    <data>
+        <record id="view_employee_form" model="ir.ui.view">
+            <field name="name">employee.form</field>
+            <field name="model">pharmacy.employee</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="toggle_activity" type="object" string="Deactivate" invisible="not activity"/>
+                        <button name="toggle_activity" type="object" string="Activate" class="oe_highlight" invisible="activity"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="birthdate"/>
+                                <field name="age"/>
+                                <field name="gender"/>
+                            </group>
+                            <group>
+                                <field name="occupation"/>
+                                <field name="degree" forcesave="1"/>
+                                <field name="professional_license" readonly="degree == 'high_school'"/>
+                                <field name="activity"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Sales order" id="page_order_employee">
+                                <field name="sale_order_id">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="date_order"/>
+                                        <field name="partner_id"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_employee_list" model="ir.ui.view">
+            <field name="name">employee.list</field>
+            <field name="model">pharmacy.employee</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="occupation"/>
+                    <field name="birthdate"/>
+                    <field name="degree"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="search_employee" model="ir.ui.view">
+            <field name="name">employee.search</field>
+            <field name="model">pharmacy.employee</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="degree"/>
+                    <field name="occupation"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_employee" model="ir.actions.act_window">
+            <field name="name">Employees</field>
+            <field name="res_model">pharmacy.employee</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
