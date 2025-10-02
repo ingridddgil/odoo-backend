@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.menu" id="project.menu_projects">
+        <field name="active" eval="False"/>
+    </record>
+
+    <menuitem
+            name="Especialidades"
+            id="project_tags2"
+            action="project_tags_action"
+            parent="project.menu_main_pm"
+            sequence="1"
+        />
+
+    <!-- Nuevo Menú "Control" sin acción -->
+    <menuitem
+            name="Control"
+            id="menu_control"
+            parent="project.menu_main_pm"
+            sequence="15"
+        />
+
+    <!-- Submenú "Avances" bajo "Control" -->
+    <menuitem
+            name="Avances"
+            id="project_sub_update"
+            action="project_sub_update_action"
+            parent="menu_control"
+            sequence="1"
+        />
+
+    <!-- Submenú "Supervisores" bajo "Control" -->
+    <menuitem
+            name="Supervisores"
+            id="menu_supervisor_area"
+            action="action_supervisor_area"
+            parent="menu_control"
+            sequence="2"
+        />
+
+    <!-- Submenú "Licencias" bajo "Control" -->
+    <menuitem
+            name="Licencias"
+            id="menu_license_license"
+            action="action_license_license"
+            parent="menu_control"
+            sequence="3"
+            groups="project_modificaciones.group_license_create"
+        />
+
+    <menuitem
+            id="menu_pending_service"
+            name="Servicios Pendientes"
+            parent="menu_control"
+            action="action_pending_service"
+            sequence="4"
+            groups="project_modificaciones.group_license_create"
+        />
+</odoo>

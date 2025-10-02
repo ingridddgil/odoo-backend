@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_project_sub_update_project_user,project.sub.update.project.user,model_project_sub_update,project.group_project_user,1,1,1,0
+access_project_supervisor_area_project_user,project.supervisor.area.project.user,model_supervisor_area,project.group_project_user,1,1,1,0
+access_project_sub_update_project_manager,project.sub.update.project.manager,model_project_sub_update,project.group_project_manager,1,1,1,0
+access_license_generator,access_license_generator,model_license_generator,,1,1,1,1
+access_license_disciplina,access_license_disciplina,model_license_disciplina,,1,1,1,1
+access_sale_order_origen,sale.order.origen,model_sale_order_origen,base.group_user,1,1,1,1
+access_sale_order_destino,sale.order.destino,model_sale_order_destino,base.group_user,1,1,1,1
+access_sale_order_incidencia,sale.order.incidencia,model_sale_order_incidencia,base.group_user,1,1,1,1

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_sub_update_action" model="ir.actions.act_window">
+            <field name="name">Avances</field>
+            <field name="res_model">project.sub.update</field>
+            <field name="view_mode">list,pivot,form,graph</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                No tags found. Let's create one!
+              </p>
+              <p>
+                Use tags to categorize your tasks.
+              </p>
+            </field>
+    </record>
+
+    <record id="hr_hr_employee_view_form3" model="ir.ui.view">
+        <field name="name">hr.hr.employee.view.form2</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="priority" eval="70" />
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='company_id']" position="after">
+                    <field name="supervisa" string="Supervisa Trabajos" widget="boolean_toggle" groups="base.group_system"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_form" model="ir.ui.view">
+        <field name="name">project.sub.update.view.form</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="no_fact,fact,inc" readonly="1"/>
+                    <button name="action_mark_invoiced" type="object"
+                        string="Marcar como facturado" class="btn-success" icon="fa-check"
+                        invisible="state == 'fact'"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                    <button name="action_mark_not_invoiced" type="object" string="Marcar como no facturado" class="btn-danger" icon="fa-times"
+                        invisible="state == 'no_fact'"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                    <button name="action_mark_incobrable" type="object" string="Marcar como incobrable" class="btn-muted" icon="fa-times"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                </header>
+                <sheet>
+                    <div class="float-end fs-6 border-0">
+                        <field name="serv_assig" widget="badge"
+                               decoration-muted="serv_assig == 'no_assig'"
+                               decoration-primary ="serv_assig == 'assig'"
+                               />
+                    </div>
+                    <separator string="Datos del servicio"/>
+
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                        </group>
+                        <group>
+                            <field name="update_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <h3><field name="task_id" string="Partida" placeholder="Seleccione la tarea" style="width: 100%" options="{'no_create': True}"/></h3>
+                    <group>
+                        <group>
+                            <field name="cliente" options="{'no_open': True}"/>
+                            <field name="disciplina" options="{'no_open': True}"/>
+                            <field name="date" string="Fecha de avance"/>
+                        </group>
+                        <group>
+                            <field name="sale_order_id"/>
+                            <field name="state" invisible="1" readonly="1"/>
+                            <field name="analitica"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Responsable Interno">
+                            <field name="responsible_id" placeholder="Responsable del servicio"
+                                widget="many2one_avatar_user" options="{'no_open': True,'no_create': True, 'no_edit':True}"/>
+                        </group>
+                        <group string="Responsable Cliente">
+                            <field name="supervisorplanta" string="Supervisor"/>
+                            <field name="area"/>
+                        </group>
+                    </group>
+
+                    <separator string="Avance Actual"/>
+                    <group>
+                        <group>
+                            <field name="unit_progress" widget="float" digits="[12,6]"/>
+                            <field name="virtual_quant_progress" string="Unidades entregadas" widget="float" digits="[12,6]"/>
+                        </group>
+                        <group>
+                            <field name="actual_progress_percentage" widget="percentage"/>
+                            <field name="missing_quant" digits="[12,6]"/>
+                            <field name="proj" invisible="1"/>
+                            <field name="projid" invisible="1"/>
+                            <field name="projname" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Avance del servicio"/>
+                    <group>
+                        <group>
+                            <field name="estado" invisible="1"/>
+                            <field name="virtual_quant_progress" string="Unidades entregadas" digits="[12,6]"/>
+                            <field name="sale_current"/>
+                        </group>
+                        <group>
+                            <field name="quant_total" string="Unidades a entregar" widget="float" digits="[12,6]"/>
+                            <field name="virtual_total_progress" string="Progreso total" widget="progressbar"/>
+                        </group>
+                    </group>
+
+                    <separator string="Estado de la facturacion"/>
+                    <group>
+                        <group>
+                            <field name="bitacorapmv"/>
+                            <field name="numlic" string="#Bitacora/Licencia"/>
+                            <field name="estimado" readonly="0"/>
+                            <field name="datefact" readonly="0"/>
+                            <field name="is_invoiced" invisible="1"/>
+                            <field name="sale_total"/>
+                        </group>
+                        <group>
+                            <field name="om"/>
+                            <field name="cot"/>
+                            <field name="avanceparc" readonly="0"/>
+                            <field name="factura" options="{'no_edit': True, 'no_create': True}" readonly="0"/>
+                            <field name="sale_actual"/>
+                            <field name="sale_missing"/>
+                        </group>
+
+                        <field name="domain" invisible="1"/>
+                        <field name="incidencia"/>
+                    </group>
+                    <separator string="Seguimiento"/>
+
+                    <field name="write_date" string="Modificado por ult. vez"/>
+                </sheet>
+                <chatter/></form>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_list" model="ir.ui.view">
+        <field name="name">project.sub.update.view.list</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <list class="o_sale_order" string="Avances físicos">
+                <header>
+                    <button name="action_mark_invoiced" type="object" string="Facturado" class="oe_stat_button" icon="fa-check"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                    <button name="action_mark_not_invoiced" type="object" string="No Facturado" icon="fa-times"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                </header>
+                <field name="date" widget="date"/>
+                <field name="numlic" optional="hide"/>
+                <field name="cliente" optional="show"/>
+                <field name="project_id" optional="show"/>
+                <field name="disciplina" optional="show"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="task_id" optional="show"/>
+                <field name="unit_progress"  widget="float" digits="[12,6]" optional="show"/>
+                <field name="serv_assig" widget="badge"
+                    decoration-danger="serv_assig == 'no_assig'"
+                    decoration-success="serv_assig == 'assig'" optional="show"/>
+                <field name="sale_current" sum="Total" optional="show"/>
+                <field name="bitacorapmv" optional="hide"/>
+                <field name="estimado" optional="hide"/>
+                <field name="avanceparc" optional="hide"/>
+                <field name="cot" optional="hide"/>
+                <field name="cotizacion" optional="hide"/>
+                <field name="om" optional="hide"/>
+                <field name="factura" string="Factura" optional="show"/>
+                <field name="datefact" string="Fecha Fact." optional="show"/>
+                <field name="state" string="Estado facturacion" widget="badge"
+                    decoration-danger="state == 'no_fact'"
+                    decoration-success="state == 'fact'"
+                    optional="show"
+                    />
+
+                <field name="state" column_invisible="True"/>
+                <button name="action_mark_invoiced"
+                        type="object"
+                        class="btn btn-success"
+                        icon="fa-check"
+                        title="Marcar como facturado"
+                        invisible="state == 'fact'"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+                <button name="action_mark_not_invoiced"
+                        type="object"
+                        class="btn btn-danger"
+                        icon="fa-times"
+                        title="Marcar como facturado"
+                        invisible="state == 'no_fact'"
+                        groups="project_modificaciones.group_sub_update_mark_invoiced"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="project_sub_update_view_pivot" model="ir.ui.view">
+        <field name="name">project.sub.update.view.pivot</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <pivot string ="Avances de obra">
+                <field name="date" interval="month" type="col"/>
+                <field name="datefact" interval="month"/>
+                <field name="cliente" type="row"/>
+                <field name="disciplina" type="row"/>
+                <field name="serv_assig"/>
+                <field name="responsible_id"/>
+                <field name="project_id"/>
+                <field name="task_id"/>
+                <field name="state"/>
+                <field name="sale_current" type="measure"/>
+                <field name="incidencia" force_save="1"/>
+            </pivot>
+        </field>
+    </record>
+
+
+    <record id="project_sub_update_view_graph" model="ir.ui.view">
+        <field name="name">project.sub.update.view.graph</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <graph string ="Avances de obra">
+                <field name="date" interval="month" type="col"/>
+                <field name="datefact"/>
+                <field name="cliente" type="row"/>
+                <field name="disciplina"/>
+                <field name="state" />
+                <field name="serv_assig"/>
+                <field name="responsible_id" type="row"/>
+                <field name="sale_current" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="project_sub_update_view_search" model="ir.ui.view">
+        <field name="name">project.sub.update.view.search</field>
+        <field name="model">project.sub.update</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Proyecto" name="project_filter" domain="[('project_id', '!=', False)]"/>
+                <filter string="Responsable" name="responsible_filter" domain="[('responsible_id', '!=', False)]"/>
+                <filter string="Fecha Avance" name="filter__date" date="date"/>
+                <filter string="Fecha Fact." name="filter_datefact" date="datefact"/>
+                <filter string="Con orden" name="asignado" domain="[('serv_assig', '=', 'assig')]"/>
+                <filter string="Sin orden" name="noasignado" domain="[('serv_assig', '=', 'no_assig')]"/>
+                <filter string="Facturado" name="filter_facturado" domain="[('state', '=', 'fact')]"/>
+                <filter string="No facturado" name="filter_nofacturado" domain="[('state', '=', 'no_fact')]"/>
+                <filter string="Estimado" name="filter_estimado" domain="[('estimado', '=', True)]"/>
+                <filter string="No estimado" name="filter_noestimado" domain="[('state', '!=', True)]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter string="Cliente" name="client_group" context="{'group_by': 'cliente'}"/>
+                    <filter string="Pedido" name="pedido_group" context="{'group_by': 'sale_order_id'}"/>
+                    <filter string="Proyecto" name="project_group" context="{'group_by': 'project_id'}"/>
+                    <filter string="Fecha" name="project_date" context="{'group_by': 'date'}"/>
+                    <filter string="Fecha Facturacion" name="project_datefact" context="{'group_by': 'datefact'}"/>
+                    <filter string="Especialidad" name="project_esp" context="{'group_by': 'disciplina'}"/>
+                    <filter string="Responsable" name="responsible_group" context="{'group_by': 'responsible_id'}"/>
+                    <filter string="Estado de orden" name="order_status_group" context="{'group_by': 'serv_assig'}"/>
+                    <filter string="Estado de facturacion" name="orden_fact" context="{'group_by':'state'}"/>
+                    <filter string="Estado de estimacion" name="orden_est" context="{'group_by':'estimado'}"/>
+                </group>
+                <field name="avanceparc" string="Avance" filter_domain="[('avanceparc', 'ilike', self)]"/>
+                <field name="om" string="OM" filter_domain="[('om', 'ilike', self)]"/>
+                <field name="project_id"/>
+                <field name="task_id"/>
+                <field name="responsible_id" string="Responsable" filter_domain="[('responsible_id', 'ilike', self)]"/>
+                <field name="date"/>
+                <field name="datefact"/>
+                <field name="sale_order_id" string="Pedido" filter_domain="[('sale_order_id', 'ilike', self)]"/>
+                <field name="cliente"/>
+                <field name="analitica"/>
+                <field name="avanceparc" string="Avance" filter_domain="[('avanceparc', 'ilike', self)]"/>
+                <field name="numlic" string="Bitacora/Licencia" filter_domain="[('numlic', 'ilike', self)]"/>
+                <field name="cotizacion" string="#Cotizacion" filter_domain="[('cotizacion', 'ilike', self)]"/>
+                <field name="cot" string="#Cot/Presupuesto" filter_domain="[('cot', 'ilike', self)]"/>
+            </search>
+        </field>
+    </record>
+</odoo>
