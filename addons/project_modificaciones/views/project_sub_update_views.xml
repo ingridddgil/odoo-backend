@@ -72,7 +72,7 @@
                         <group>
                             <field name="sale_order_id"/>
                             <field name="state" invisible="1" readonly="1"/>
-                            <field name="analitica"/>
+<!--                            <field name="analitica"/>-->
                         </group>
                     </group>
                     <group>
@@ -276,7 +276,7 @@
                 <field name="datefact"/>
                 <field name="sale_order_id" string="Pedido" filter_domain="[('sale_order_id', 'ilike', self)]"/>
                 <field name="cliente"/>
-                <field name="analitica"/>
+<!--                <field name="analitica"/>-->
                 <field name="avanceparc" string="Avance" filter_domain="[('avanceparc', 'ilike', self)]"/>
                 <field name="numlic" string="Bitacora/Licencia" filter_domain="[('numlic', 'ilike', self)]"/>
                 <field name="cotizacion" string="#Cotizacion" filter_domain="[('cotizacion', 'ilike', self)]"/>

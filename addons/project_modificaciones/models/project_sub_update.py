@@ -27,7 +27,7 @@ class ProjectSubUpdate(models.Model):
     proj = fields.Many2one(related='update_id.project_id', store=True)
     projid = fields.Integer(related='proj.id', string='ID del proyecto', store=True)
     projname = fields.Char(related='proj.name', string='Nombre del proyecto', store=True)
-    analitica = fields.Many2one(string="Analitica", related='project_id.analytic_account_id')
+    #analitica = fields.Many2one(string="Analitica", related='project_id.analytic_account_id')
     prev_progress = fields.Integer(related="task_id.progress", string="Current Progress", default=0)
     quant_total = fields.Float(related="task_id.total_pieces", default=0.0)
     unit_progress = fields.Float(string="Avance de unidades", default=0.0)

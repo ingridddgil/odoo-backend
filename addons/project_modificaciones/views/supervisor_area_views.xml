@@ -276,7 +276,6 @@
     <menuitem
         id="menu_disciplina"
         name="Disciplinas"
-        parent="menu_control"
         action="action_disciplina"
         sequence="4"
     />
