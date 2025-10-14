@@ -31,14 +31,14 @@ class Project(models.Model):
             ('cancel', "Cancelled"),
         ], related="sale_order_id.state", store=True)
 
-    cliente = fields.Many2one(string="Cliente", related='sale_line_id.order_id.partner_id')
+    client = fields.Many2one(string="Cliente", related='sale_line_id.order_id.partner_id')
     invoiced = fields.Float(string="Facturado", compute="_invoiced", store=True)
     #equipo de venta en revision
     team_id = fields.Many2one(string="Sales Team", related="sale_order_id.team_id", store=True)
 
     """
     @api.depends('sub_update_ids', 'sub_update_ids.unit_progress', 'sub_update_ids.task_id')
-    def _updatestatus(self):
+    def _update_status(self):
         current_project_id = self.id
         # Utiliza el ID del proyecto actual según sea necesario
         # Por ejemplo, puedes buscar las tareas relacionadas con el proyecto actual

@@ -19,8 +19,11 @@ class PendingService(models.Model):
         ('assigned', 'Asignada'),
         ('canceled', 'Cancelada'),
     ], string='Estado', default='draft', tracking=True)
+
     supervisor_id = fields.Many2one('hr.employee', string='Supervisor', tracking=True)
+
     disciplina_id = fields.Many2one('license.disciplina', string='Disciplina', required=True, tracking=True)
+
     service_line_ids = fields.One2many('pending.service.line', 'service_id', string='Líneas de Servicio', delete='cascade')
     total = fields.Float(string='Total', compute='_compute_total', store=True)
     date = fields.Date(string='Fecha', default=datetime.today(), tracking=True)
@@ -30,7 +33,7 @@ class PendingService(models.Model):
     planta = fields.Char(string='Planta', tracking=True)
     supervisor_planta_id = fields.Many2one('supervisor.area', string='Supervisor de Planta', tracking=True)
     manage_via_or = fields.Boolean(string='Gestionar mediante OR', default=False, tracking=True)
-    descripcion_servicio = fields.Text(string='Descripción del Servicio', tracking=True)  # Nuevo campo
+    service_description = fields.Text(string='Descripción del Servicio', tracking=True)  # Nuevo campo
         
     @api.model_create_multi
     def create(self, vals_list):

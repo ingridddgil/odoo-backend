@@ -8,7 +8,7 @@ class SupervisorArea(models.Model):
     _description = 'Supervisor de Area'
 
     name = fields.Char(string='Nombre', required=True)
-    cliente = fields.Many2one('res.partner', string='Cliente', required=True)
+    client = fields.Many2one('res.partner', string='Cliente', required=True)
 
 class Generator(models.Model):
     _name = 'license.generator'
@@ -16,9 +16,10 @@ class Generator(models.Model):
 
     name = fields.Char(string='Nombre del Generadorista', required=True)
 
-class Disciplina(models.Model):
+class Discipline(models.Model):
+    # Categoría de servicio
     _name = 'license.disciplina'
-    _description = 'Disciplina'
+    _description = 'Discipline'
     _sql_constraints = [
         ('name_unique', 'unique(name)', 'El nombre de la disciplina debe ser único.')
     ]
@@ -28,11 +29,11 @@ class Disciplina(models.Model):
     sequence_generated = fields.Boolean(string='Secuencia Generada', default=False, readonly=True)
 
     def generate_sequence(self):
-        for disciplina in self:
-            if not disciplina.sequence_id:
-                prefix = disciplina.name[:3].upper()
+        for discipline in self:
+            if not discipline.sequence_id:
+                prefix = discipline.name[:3].upper()
                 sequence_vals = {
-                    'name': f'Secuencia para {disciplina.name}',
+                    'name': f'Secuencia para {discipline.name}',
                     'code': f'INNPEND{prefix}',
                     'prefix': f'INNPEND{prefix}',
                     'suffix': '/%(year)s',  # Sufijo con el año actual
@@ -40,22 +41,22 @@ class Disciplina(models.Model):
                     'company_id': False,
                 }
                 sequence = self.env['ir.sequence'].create(sequence_vals)
-                disciplina.sequence_id = sequence
-                disciplina.sequence_generated = True
+                discipline.sequence_id = sequence
+                discipline.sequence_generated = True
 
 
     @api.constrains('name')
     def _check_name_length(self):
-        for disciplina in self:
-            if len(disciplina.name) < 3:
+        for discipline in self:
+            if len(discipline.name) < 3:
                 raise ValidationError(_('El nombre de la disciplina debe tener al menos 3 caracteres.'))
 
     @api.model
     def create(self, vals):
-        disciplina = super(Disciplina, self).create(vals)
-        prefix = disciplina.name[:3].upper()
+        discipline = super(Discipline, self).create(vals)
+        prefix = discipline.name[:3].upper()
         sequence_vals = {
-            'name': f'Secuencia para {disciplina.name}',
+            'name': f'Secuencia para {discipline.name}',
             'code': f'INNPEND{prefix}',
             'prefix': f'INNPEND{prefix}',
             'suffix': '/%(year)s',  # Sufijo con el año actual
@@ -63,10 +64,10 @@ class Disciplina(models.Model):
             'company_id': False,
         }
         sequence = self.env['ir.sequence'].create(sequence_vals)
-        disciplina.sequence_id = sequence
-        disciplina.sequence_generated = True
+        discipline.sequence_id = sequence
+        discipline.sequence_generated = True
         
-        return disciplina
+        return discipline
         
 class License(models.Model):
     _name = 'license.license'
@@ -77,9 +78,9 @@ class License(models.Model):
     date = fields.Date(string='Fecha', default=datetime.today(), tracking=True)
     supervisor_id = fields.Many2one('hr.employee', string='Supervisor', tracking=True)
     hours_reported = fields.Float(string='Horas Reportadas', tracking=True)
-    pedido = fields.Text(string='Pedido', tracking=True)  # Nuevo campo
-    pend = fields.Text(string='OR/Pendiente', tracking=True)  # Nuevo campo
-    disc = fields.Many2one('license.disciplina', string='Disciplina', tracking=True)
+    order = fields.Text(string='Pedido', tracking=True)  # Nuevo campo pedido -> order
+    pending = fields.Text(string='OR/Pendiente', tracking=True)  # Nuevo campo
+    discipline = fields.Many2one('license.disciplina', string='Disciplina', tracking=True)
     notes = fields.Text(string='Notas', tracking=True)  # Nuevo campo
     state = fields.Selection([
         ('no_ent', 'No entregada'),
