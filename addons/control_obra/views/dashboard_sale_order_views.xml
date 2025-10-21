@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Botón en Sale Order -->
+    <record id="view_sale_order_dashboard_button" model="ir.ui.view">
+        <field name="name">sale.order.dashboard.button</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_sale_dashboard" type="object"
+                        class="oe_stat_button" icon="fa-tachometer" invisible="state in ['draft','sent','cancel']">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Dashboard</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista del Dashboard -->
+    <record id="view_dashboard_sale_order_form" model="ir.ui.view">
+        <field name="name">dashboard.sale.order.form</field>
+        <field name="model">dashboard.sale.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_purchase_orders" type="object"
+                            class="oe_stat_button" icon="fa-shopping-cart">
+                        <field name="purchase_count" widget="statinfo" string="Compras"/>
+                    </button>
+                    <button name="action_view_expenses_count" type="object"
+                            class="oe_stat_button" icon="fa-money">
+                        <field name="expenses_count" widget="statinfo" string="Gastos"/>
+                    </button>
+                    <button name="action_view_sale_order_lines" type="object"
+                            class="oe_stat_button" icon="fa-list">
+                        <field name="lines_count" widget="statinfo" string="Líneas"/>
+                    </button>
+                    <button name="action_view_avances_dashboard" type="object"
+                            class="oe_stat_button" icon="fa-file-text">
+                        <field name="avances_count" widget="statinfo" string="Avances"/>
+                    </button>
+                </div>
+
+                <!-- Contenido del dashboard -->
+                <div class="container-fluid">
+                    <field name="contenido" widget="html"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_view_avances_from_dashboard" model="ir.actions.act_window">
+        <field name="name">Avances de la Línea de Venta</field>
+        <field name="res_model">creacion.avances</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('sale_order_line_id', '=', active_id)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="target">new</field>
+    </record>
+
+
+    <!--PLANTILLA QWEB-->
+    <template id="sale_order_dashboard_template" name="Sale Order Dashboard Template">
+        <div class="row mb-4 dashboard-container">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h4 class="card-title h4">
+                                <i class="fa fa-tachometer me-2"></i>
+                                Dashboard - Orden de Venta:
+                                <t t-esc="sale_order.name"/>
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="fechas">
+                                        <i class="fa fa-calendar me-1"></i>
+                                        Fecha:
+                                        <t t-esc="sale_order.date_order"/>
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <small class="fechas">
+                                        <i class="fa fa-refresh me-1"></i>
+                                        Actualizado:
+                                        <t t-esc="current_date"/>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span t-attf-class="badge valores bg-{{
+                                        'secondary' if sale_order.state == 'draft' else
+                                        'info' if sale_order.state == 'sent' else
+                                        'success' if sale_order.state == 'sale' else
+                                        'primary' if sale_order.state == 'done' else
+                                        'danger'
+                                    }}">
+                                    <t t-esc="sale_order.state"/>
+                                </span>
+                                <span class="badge valores bg-warning ms-2">
+                                    <t t-esc="format_monetary(sale_order.amount_total)"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Principales -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="section-title">Ingresos y Facturación</h2>
+                    <div class="row">
+                        <!-- Esperado -->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Pedido</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="kpi-value">
+                                        <t t-esc="format_monetary(financials['revenue'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Total pedido</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Entregado-->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Entregado</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="kpi-value text-green">
+                                        <t t-esc="format_monetary(metrics['avances_value_delivered'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Total entregado</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Facturado-->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Facturado</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="kpi-value">
+                                        <t t-esc="format_monetary(financials['invoiced'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Total facturado</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Por Facturar-->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Por Facturar</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="kpi-value">
+                                        <t t-esc="format_monetary(financials['x_invoiced'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Total por facturar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="section-title">Costos y Rentabilidad</h2>
+                    <div class="row">
+                        <!-- Costos -->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Costos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 class="kpi-value text-danger">
+                                        <t t-esc="format_monetary(financials['costs'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Compras + Gastos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Margen -->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Margen</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 t-attf-class="kpi-value {{ 'text-success' if financials['profit_margin'] >= 0 else 'text-danger' }}">
+                                        <t t-esc="format_monetary(financials['profit_margin'])"/>
+                                    </h3>
+                                    <p class="small text-muted">Entregado - Costos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rentabilidad -->
+                        <div class="col-md-3">
+                            <div class="card animacion text-center">
+                                <div class="kpi-header">
+                                    <h6>Rentabilidad</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h3 t-attf-class="kpi-value {{ 'text-success' if financials['profitability_percentage'] >= 0 else 'text-danger' }}">
+                                        <t t-esc="format_percentage(financials['profitability_percentage'])"/>
+                                    </h3>
+                                    <p class="small text-muted">
+                                        <t t-esc="format_monetary(financials['profit_margin'])"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Detalladas -->
+            <div class="row">
+                <!-- Compras -->
+                <div class="col-md-4">
+                    <div class="card animacion">
+                        <div class="card-header">
+                            <h6 class="card-title">
+                                <i class="fa fa-shopping-cart me-2"></i>
+                                Compras
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Órdenes:</span>
+                                    <span class="badge badge-compras" t-esc="metrics['purchase_count']"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Total:</span>
+                                <span class="fw-bold" t-esc="format_monetary(metrics['purchase_total'])"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gastos -->
+                <div class="col-md-4">
+                    <div class="card animacion">
+                        <div class="card-header">
+                            <h6 class="card-title">
+                                <i class="fa fa-money me-2"></i>
+                                Gastos
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Registros:</span>
+                                    <span class="badge badge-gastos" t-esc="metrics['expenses_count']"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Total:</span>
+                                <span class="fw-bold" t-esc="format_monetary(metrics['expenses_total'])"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Líneas de Venta -->
+                <div class="col-md-4">
+                    <div class="card animacion">
+                        <div class="card-header">
+                            <h6 class="card-title">
+                                <i class="fa fa-list me-2"></i>
+                                Líneas de Venta
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Items:</span>
+                                    <span class="badge badge-lines" t-esc="metrics['lines_count']"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Total:</span>
+                                <span class="fw-bold" t-esc="format_monetary(metrics['lines_total'])"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avances y Progreso - Solo si hay avances -->
+            <t t-if="metrics['avances_count'] > 0">
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title">
+                                    <i class="fa fa-tasks me-2"></i>
+                                    Avances del Proyecto
+                                    <span class="badge badge-avance ms-2" t-esc="metrics['avances_count']"/>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Progreso General -->
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <h6 class="h6">Progreso General</h6>
+                                            <div class="progress mb-2">
+                                                <div t-attf-class="progress-bar {{
+                                                                    'bg-danger' if metrics['avances_progress'] &lt; 25 else
+                                                                    'bg-warning' if metrics['avances_progress'] &lt; 75 else
+                                                                    'bg-success'
+                                                                }}"
+                                                     role="progressbar"
+                                                     t-att-style="'width: {0}%'.format(metrics['avances_progress'])"
+                                                     aria-valuenow="50"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100">
+                                                </div>
+                                                <span class="progress-text">
+                                                    <t t-esc="format_percentage(metrics['avances_progress'])"/>
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">Completado</small>
+                                        </div>
+                                    </div>
+                                    <!-- Métricas de Unidades -->
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <h6 class="h6">Unidades</h6>
+                                            <h4 class="text-success valores-metricas"
+                                                t-esc="format_unit(metrics['avances_units_delivered'])"/>
+                                            <small class="text-muted">Unidades entregadas</small>
+                                        </div>
+                                    </div>
+
+                                    <!--Métricas de Unidades Faltantes-->
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <h6 class="h6">Unidades</h6>
+                                            <h4 class="text-danger valores-metricas"
+                                                t-esc="format_unit(metrics['avances_units_missing'])"/>
+                                            <small class="text-muted">Unidades faltantes</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Métricas de Valor -->
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <h6 class="h6">Valor Entregado</h6>
+                                            <h4 class="text-success valores-metricas"
+                                                t-esc="format_monetary(metrics['avances_value_delivered'])"/>
+                                            <small class="text-muted">
+                                                de
+                                                <t t-esc="format_monetary(metrics['avances_value_expected'])"/>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Desglose por Avance -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h6 class="mb-3 h6">Desglose de Avances</h6>
+                                        <div class="scroll-box">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-striped"
+                                                       style="table-layout: fixed;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 12%">ID Avance</th>
+                                                            <th style="width: 28%">Producto</th>
+                                                            <th class="text-center" style="width: 10%">Supervisor</th>
+                                                            <th class="text-center" style="width: 10%">Unidades</th>
+                                                            <th class="text-center" style="width: 15%">Valor</th>
+                                                            <th style="width: 10%">Progreso</th>
+                                                            <th class="text-center" style="width: 15%">Fecha</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-foreach="sale_order.project_sub_updates.sorted(key=lambda avance: avance.create_date, reverse=True)"
+                                                           t-as="avance">
+                                                            <tr class="align-middle">
+                                                                <td>
+                                                                    <a t-attf-href="/web#id=#{avance.id}&amp;model=creacion.avances&amp;view_type=form"
+                                                                       target="_blank"
+                                                                       onclick="window.open(this.href); return false;">
+                                                                        <span class="badge span-bg"
+                                                                              t-esc="avance.name"/>
+                                                                    </a>
+                                                                </td>
+                                                                <td style="white-space: normal; overflow-wrap: break-word;"
+                                                                    t-esc="avance.producto.name if avance.producto else 'SIN PRODUCTO'"/>
+                                                                <td class="text-center"
+                                                                    t-esc="avance.responsible_id.name"/>
+                                                                <td class="text-center"
+                                                                    t-esc="format_unidad(avance.unit_progress or 0)"/>
+                                                                <td class="text-center"
+                                                                    t-esc="format_monetary(avance.sale_actual or 0)"/>
+                                                                <td>
+                                                                    <span class="badge progreso bg-success">
+                                                                        <t t-esc="format_percentage(avance.actual_progress or 0)"/>
+                                                                    </span>
+                                                                </td>
+                                                                <td class="text-center"
+                                                                    t-esc="avance.date if avance.date else 'SIN FECHA'"/>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+
+            <t t-if="metrics['lines_count'] > 0">
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title">
+                                    <i class="fa fa-list me-2"></i>
+                                    Desglose de Líneas de Venta
+                                    <span class="badge badge-lines ms-2" t-esc="metrics['lines_count']"/>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="scroll-box">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped" style="table-layout: fixed;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 30%">Descripción</th>
+                                                    <th class="text-center" style="width: 10%">Cantidad Pedida</th>
+                                                    <th class="text-center" style="width: 10%">Avance Unidades</th>
+                                                    <th class="text-center" style="width: 15%">Avance %</th>
+                                                    <th class="text-center" style="width: 10%">Cant. Facturada</th>
+                                                    <th class="text-center" style="width: 15%">Subtotal</th>
+                                                    <th class="text-center" style="width: 10%">Ver Avances</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="sale_order.order_line" t-as="line">
+                                                    <tr class="align-middle">
+                                                        <td style="white-space: normal; overflow-wrap: break-word;"
+                                                            t-esc="line.name"/>
+                                                        <td class="text-center" t-esc="line.product_uom_qty"/>
+                                                        <td class="text-center"
+                                                            t-esc="format_unidad(line.qty_avances_delivered)"/>
+                                                        <td>
+                                                            <div class="progress">
+                                                                <div t-attf-class="progress-bar {{
+                                                                'bg-danger' if line.progress_percentage &lt; 25 else
+                                                                'bg-warning' if line.progress_percentage &lt; 75 else
+                                                                'bg-success'
+                                                                }}"
+                                                                     role="progressbar"
+                                                                     t-attf-style="width: #{line.progress_percentage}%;"
+                                                                     aria-valuenow="50"
+                                                                     aria-valuemin="0"
+                                                                     aria-valuemax="100">
+                                                                </div>
+                                                                <span class="progress-bar-text"
+                                                                      t-esc="format_percentage(line.progress_percentage or 0)"/>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center" t-esc="line.qty_invoiced"/>
+                                                        <td class="text-center"
+                                                            t-esc="format_monetary(line.price_subtotal)"/>
+                                                        <td class="text-center">
+                                                            <t t-if="line.avances_ids">
+                                                                <a t-attf-href="/web#action=control_obra.action_view_avances_from_dashboard&amp;active_id=#{line.id}"
+                                                                   title="Ver Avances de esta línea"
+                                                                   target="_blank">
+                                                                    <span class="badge span-bg">
+                                                                        <i class="fa fa-eye me-1"/>
+                                                                        <t t-esc="len(line.avances_ids)"/>
+                                                                    </span>
+                                                                </a>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Resumen Financiero -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title">Resumen Financiero</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Concepto</th>
+                                        <th class="text-end">Monto</th>
+                                        <th class="text-end">Porcentaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Ingresos Totales</td>
+                                        <td class="text-end"
+                                            t-esc="format_monetary(metrics['avances_value_delivered'])"/>
+                                        <td class="text-end">100%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Costos (Compras)</td>
+                                        <td class="text-end text-danger"
+                                            t-esc="format_monetary(metrics['purchase_total'])"/>
+                                        <td class="text-end text-danger">
+                                            <t t-if="metrics['avances_value_delivered']">
+                                                <t t-esc="format_percentage((metrics['purchase_total'] / metrics['avances_value_delivered'] * 100))"/>
+                                            </t>
+                                            <t t-else="0">
+                                                0.0%
+                                            </t>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Costos (Gastos)</td>
+                                        <td class="text-end text-danger"
+                                            t-esc="format_monetary(metrics['expenses_total'])"/>
+                                        <td class="text-end text-danger">
+                                            <t t-if="metrics['avances_value_delivered']">
+                                                <t t-esc="format_percentage((metrics['expenses_total'] / metrics['avances_value_delivered'] * 100))"/>
+                                            </t>
+                                            <t t-else="0">
+                                                0.0%
+                                            </t>
+                                        </td>
+
+                                    </tr>
+                                    <tr class="fw-bold">
+                                        <td>Margen Neto</td>
+                                        <td t-attf-class="text-end {{ 'text-success' if financials['profit_margin'] >= 0 else 'text-danger' }}">
+                                            <t t-esc="format_monetary(financials['profit_margin'])"/>
+                                        </td>
+                                        <td t-attf-class="text-end {{ 'text-success' if financials['profitability_percentage'] >= 0 else 'text-danger' }}">
+                                            <t t-esc="format_percentage(financials['profitability_percentage'])"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- (border-radius: 1.25rem;) -->
+        <style>
+            :root {
+            --primary-color: #8c3e38;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --badge-compras: #CF9BF2;
+            --badge-gastos: #88B6F7;
+            --badge-lines: #58D558;
+            --badge-avance: #FFB617;
+            --badge-span: #BABABA;
+            --header-font-size: 1.1rem;
+            --header-font-weight: 600;
+            --header-padding: 1rem 1.5rem;
+            }
+
+            .dashboard-container {
+            background-color: #FFFFFF;
+            padding: 2rem;
+            }
+
+            .card {
+            margin-bottom: 1.5rem;
+            border: none;
+            box-shadow: var(--card-shadow);
+            border-radius: var(--border-radius);
+            height: calc(100% - 1.5rem);
+            overflow: hidden;
+            }
+
+            .card-clickable {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 0;
+            text-align: left;
+            cursor: pointer;
+            }
+
+            /* Animación solo para ciertos card se les asigna la clase animacion */
+            .card.animacion {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .card.animacion:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+            z-index: 10;
+            position: relative;
+            }
+
+            /* Encabezados de TODAS las tarjetas - ESTILO UNIFICADO */
+            .card-header {
+            background-color: var(--primary-color);
+            border-bottom: none;
+            color: #FFFFFF;
+            font-weight: var(--header-font-weight);
+            padding: var(--header-padding);
+            font-size: var(--header-font-size);
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            }
+
+            .card-header .card-title {
+            margin: 0;
+            font-size: var(--header-font-size);
+            font-weight: var(--header-font-weight);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            }
+
+            /* Diseño Header (Dashboard - Orden de Venta) */
+            .card-title.h4 {
+            margin: auto 0 auto 0;
+            font-size: 1.50rem;
+            font-weight: var(--header-font-weight);
+            color: #000000;
+            display: flex;
+            align-items: center;
+            }
+
+            .fechas {
+            margin: auto 0 auto 0;
+            font-size: 1rem;
+            font-weight: 400;
+            color: #000000;
+            }
+
+            .valores {
+            margin: auto 0 auto 0;
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: var(--border-radius);
+            color: #000000;
+            }
+
+            .valores-metricas {
+            font-size: 1.50rem;
+            font-weight: 600;
+            }
+
+            /* Encabezados de KPIs - Mismo estilo que card-header */
+            .kpi-header {
+            background-color: var(--primary-color);
+            color: #FFFFFF;
+            font-weight: var(--header-font-weight);
+            padding: var(--header-padding);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            font-size: var(--header-font-size);
+            }
+
+            .kpi-header h6 {
+            margin: 0;
+            font-size: var(--header-font-size);
+            font-weight: var(--header-font-weight);
+            color: #FFFFFF;
+            }
+
+            .card-body {
+            padding: 1rem 1.5rem 1.5rem;
+            }
+
+            .card-body p, span, small {
+            font-size: var(--header-font-size);
+            }
+
+            .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 0.5rem;
+            }
+
+            .text-green {
+            color: green;
+            }
+
+            .table badge {
+            font-size: 0.75rem;
+            }
+
+            .badge-compras {
+            background-color: var(--badge-compras);
+            color: black;
+            font-size: var(--header-font-size);
+            border-radius: var(--border-radius);
+            }
+
+            .badge-gastos {
+            background-color: var(--badge-gastos);
+            color: black;
+            font-size: var(--header-font-size);
+            border-radius: var(--border-radius);
+            }
+
+            .badge-lines {
+            background-color: var(--badge-lines);
+            font-size: var(--header-font-size);
+            color: black;
+            border-radius: var(--border-radius);
+            }
+
+            .badge-avance {
+            background-color: var(--badge-avance);
+            color: black;
+            font-size: var(--header-font-size);
+            border-radius: var(--border-radius);
+            }
+
+            .span-bg {
+            background: var(--badge-span);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            }
+
+            .progreso {
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            }
+
+            .table th {
+            border-top: none;
+            font-size: 1.25rem;
+            color: #000000;
+            }
+
+            .table td {
+            font-size: 1rem;
+            color: #000000;
+            }
+
+            .progress {
+            position: relative;
+            height: 1.5rem;
+            background: #e9ecef;
+            margin-bottom: 0;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            }
+
+            .progress-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            background-color: #4caf50;
+            position: relative;
+            }
+
+            .progress-text,
+            .progress-bar-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000000;
+            z-index: 5;
+            text-shadow: 0 0 2px white;
+            }
+
+            .h6 {
+            font-size: 1.25rem;
+            }
+
+            /* Asegurar que el texto sea visible en barras cortas */
+            .progress-bar[style*="width: 0%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 1%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 2%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 3%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 4%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 5%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 6%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 7%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 8%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 9%"] ~ .progress-bar-text,
+            .progress-bar[style*="width: 10%"] ~ .progress-bar-text {
+            color: #000;
+            text-align: left;
+            padding-left: 5px;
+            }
+
+            /* Estilo para el contenedor con scroll */
+            .scroll-box {
+            max-height: 380px; /* Ajusta la altura máxima a tu preferencia */
+            overflow-y: auto; /* Habilita el scroll vertical cuando el contenido excede la altura */
+            }
+
+            /* Opcional: Estilo para la barra de scroll */
+            .scroll-box::-webkit-scrollbar {
+            width: 8px;
+            }
+
+            .scroll-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+            }
+
+            .scroll-box::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+            }
+
+            .scroll-box::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            }
+
+            /* Campos Tablas: Este apartado busca modificar el tamaño de la columna */
+            .tamaño-producto {
+            width: 300px;
+            overflow-wrap: break-word;
+            white-space: normal;
+            }
+
+            .tamaño-descripcion {
+            width: 350px;
+            overflow-wrap: break-word;
+            white-space: normal;
+            }
+        </style>
+    </template>
+</odoo>

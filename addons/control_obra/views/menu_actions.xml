@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú principal Control de Obra -->
+    <menuitem
+            id="control_obra_root"
+            name="Control de obra"
+            sequence="10"
+            web_icon="control_obra,static/description/icon.png">
+    </menuitem>
+
+    <!-- Menú Proyectos -->
+    <menuitem
+            name="Proyectos"
+            id="menu_inherit_proyecto"
+            action="open_projects"
+            parent="control_obra_root"
+            sequence="1"
+    />
+
+    <!-- Menú Tareas -->
+    <menuitem
+            name="Tareas"
+            id="menu_inherit_tareas"
+            action="open_task"
+            parent="control_obra_root"
+            sequence="2"
+    />
+
+    <!-- Menú Control -->
+    <menuitem
+            name="Control"
+            id="menu_control"
+            parent="control_obra_root"
+            sequence="3"
+    />
+
+    <menuitem
+            name="Centros de Trabajo"
+            id="menu_centro_avance"
+            action="action_control_centro_trabajo"
+            parent="menu_control"
+            sequence="1"
+    />
+
+    <menuitem
+            name="Plantas de Trabajo"
+            id="menu_control_planta"
+            action="action_control_planta"
+            parent="menu_control"
+            sequence="2"
+    />
+
+    <!-- Menú Avances -->
+    <menuitem
+            id="creacion_avances"
+            name="Avances"
+            action="creacion_avances_action"
+            parent="control_obra_root"
+            sequence="4"/>
+</odoo>

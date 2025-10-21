@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_view_form_inherit" model="ir.ui.view">
+        <field name="name">project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/field[@name='company_id']" position="after">
+                <field name="state" widget="badge"/>
+                <field name="team_id"/>
+            </xpath>
+            <xpath expr="//sheet//div" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_avances" icon="fa-file-text">
+                    <field name="sub_update_ids" widget="statinfo" string="Avances"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Avances del proyecto">
+                    <group>
+                        <field name="sale_total" widget="monetary" string="Total del pedido de venta"/>
+                        <field name="sale_actual" widget="monetary" string="Entregado"/>
+                        <field name="sale_missing" widget="monetary" string="Por entregar"/>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Modificación Campo Su -->
+            <field name="user_id" position="attributes">
+                <attribute name="string">Superintendente</attribute>
+            </field>
+
+            <!--Proyecto Obra-->
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="is_proyecto_obra" widget="boolean_toggle"/>
+            </xpath>
+
+            <!--Campo supervisor-->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="coordinador" widget="many2one_avatar_user"/>
+                <field name="supervisor" widget="many2one_avatar_user" domain="[('supervisa', '=', True)]"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="project_view_list" model="ir.ui.view">
+        <field name="name">project.view.list.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="sale_actual" optional="hide"/>
+                <field name="sale_missing" optional="hide"/>
+                <field name="sale_total" optional="hide"/>
+                <field name="invoiced" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_project_filter_inherit" model="ir.ui.view">
+        <field name="name">project.project.filter.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupby_stage']" position="after">
+                <separator/>
+                <filter name="equipoventa" string="Equipo de venta" context="{'group_by': 'team_id'}"/>
+            </xpath>
+            <!--
+            <xpath expr="//filter[@name='inactive']" position="after">
+                <filter name="isproyectoobra" string="Proyectos Obra" domain="[('is_proyecto_obra', '=', True)]"/>
+                <filter name="isproyectointern" string="Proyectos Interno" domain="[('is_proyecto_obra', '=', False)]"/>
+            </xpath>
+            -->
+        </field>
+    </record>
+
+    <!--VISTA ORIGINAL NADA MAS SE AGREGO EL DOMINIO-->
+    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
+        <field name="domain">[('is_proyecto_obra', '=', False)]</field>
+    </record>
+
+    <!-- ########################################################################################################### -->
+    <record id="open_projects" model="ir.actions.act_window">
+        <field name="name">Proyectos</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_proyecto_obra', '=', True)]</field>
+        <field name="context">{'default_is_proyecto_obra': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No projects found. Let's create one!
+            </p>
+            <p>
+                Keep track of the progress of your project from creation to completion.
+                <br/>
+                Collaborate efficiently by chatting in real-time or via email.
+            </p>
+        </field>
+    </record>
+
+    <record id="view_project_kanban_control_obra" model="ir.ui.view">
+        <field name="name">project.project.kanban.control.obra</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="partner_id"/>
+                <field name="stage_id"/>
+                <templates>
+                    <!-- CAMBIAR: kanban-box → card -->
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div>
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div>
+                                <span class="text-muted">
+                                    <field name="partner_id"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="open_projects" model="ir.actions.act_window">
+        <field name="view_id" ref="view_project_kanban_control_obra"/>
+    </record>
+</odoo>

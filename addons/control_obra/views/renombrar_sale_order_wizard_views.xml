@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="renombrar_sale_order_wizard_form" model="ir.ui.view">
+        <field name="name">renombrar.sale.order.wizard.form</field>
+        <field name="model">renombrar.sale.order.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Renombrar Cotización">
+                <sheet>
+                    <group>
+                        <field name="nombre_nuevo"/>
+                    </group>
+                    <footer>
+                        <button name="action_confirm_and_rename" string="Confirmar" type="object" class="btn-primary"/>
+                        <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="renombrar_sale_order_wizard_action" model="ir.actions.act_window">
+        <field name="name">Renombrar la Cotización</field>
+        <field name="res_model">renombrar.sale.order.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

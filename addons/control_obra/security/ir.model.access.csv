@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_creacion_avances_project_user,Permisos De Usuarios Para Avances,model_creacion_avances,project.group_project_user,1,1,1,0
+access_creacion_avances_project_manager,Permisos De Administrador Para Avances,model_creacion_avances,project.group_project_manager,1,1,1,0
+access_control_planta,Control Planta,model_control_planta,base.group_user,1,1,1,1
+access_control_centro_trabajo,Control Centro Trabajo,model_control_centro_trabajo,base.group_user,1,1,1,1
+access_asignar_avances_project_wizard,Asignar Avances Project Wizard,model_asignar_avances_project_wizard,project.group_project_user,1,1,1,1
+access_tipo_contacto,Tipo Contacto,model_tipo_contacto,base.group_user,1,1,1,1
+access_dashboard_sale_order,Dashboard Sale Order,model_dashboard_sale_order,base.group_user,1,1,1,1
+access_renombrar_sale_order_wizard,Renombrar Sale Orde Wizard,model_renombrar_sale_order_wizard,,1,1,1,1

@@ -1,0 +1,9 @@
+/* Estándar moderno (y Firefox 19+) */
+.control_de_obra_view input::placeholder {
+    color: red;
+}
+
+/* Para ajustar el texto en todas las celdas de texto en una vista de lista */
+.o_list_view .o_list_table .o_data_row td.o_list_char {
+    white-space: normal !important;
+}
